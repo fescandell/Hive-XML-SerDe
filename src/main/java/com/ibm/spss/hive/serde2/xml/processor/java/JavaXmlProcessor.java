@@ -74,6 +74,7 @@ public class JavaXmlProcessor implements XmlProcessor {
 
     private List<JavaXmlQuery> queries = new ArrayList<JavaXmlQuery>();
     private Map<String, XmlMapEntry> mapSpecification = null;
+    private Map<String, String> structReplacementChars = null;
 
     /**
      * @see com.ibm.spss.hive.serde2.xml.processor.XmlProcessor#initialize(com.ibm.spss.hive.serde2.xml.processor.XmlProcessorContext)
@@ -129,9 +130,7 @@ public class JavaXmlProcessor implements XmlProcessor {
         return result;
     }
 
-    /**
-     * @see com.ibm.spss.hive.serde2.xml.processor.java.XmlProcessor.XPathProcessor#getObjectValue(java.lang.Object, java.lang.String)
-     */
+
     @SuppressWarnings("rawtypes")
     @Override
     public Object getObjectValue(Object o, String fieldName) {
@@ -267,10 +266,6 @@ public class JavaXmlProcessor implements XmlProcessor {
         return stringBuilder.toString();
     }
 
-    /**
-     * @see com.ibm.spss.hive.serde2.xml.processor.java.XmlProcessor.XPathProcessor#getPrimitiveObjectValue(java.lang.Object,
-     *      org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector.PrimitiveCategory)
-     */
     @Override
     public Object getPrimitiveObjectValue(Object o, PrimitiveCategory primitiveCategory) {
         return XmlUtils.getPrimitiveValue(getStringValue(o), primitiveCategory);
@@ -468,4 +463,12 @@ public class JavaXmlProcessor implements XmlProcessor {
         }
         return null;
     }
+
+	/**
+	 * @return the structReplacementChars
+	 */
+	public Map<String, String> getStructReplacementChars() {
+		return structReplacementChars;
+	}
+
 }

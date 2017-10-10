@@ -45,4 +45,5 @@ public interface XmlProcessorContext {
      * @return the properties
      */
     public Properties getProperties();
+    
 }

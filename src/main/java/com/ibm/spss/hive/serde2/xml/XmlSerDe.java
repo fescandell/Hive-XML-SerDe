@@ -52,6 +52,7 @@ public class XmlSerDe implements SerDe {
     private static final Logger LOGGER = Logger.getLogger(XmlSerDe.class);
     private static final String XML_PROCESSOR_CLASS = "xml.processor.class";
     private static final String MAP_SPECIFICATION_PREFIX = "xml.map.specification.";
+    private static final String STRUCT_REPLACEMENT_CHARS_PREFIX = "xml.struct.replacement.chars.";
     private static final String COLUMN_XPATH_PREFIX = "column.xpath.";
 
     private ObjectInspector objectInspector = null;
@@ -88,6 +89,8 @@ public class XmlSerDe implements SerDe {
         List<String> columnNames = Arrays.asList(properties.getProperty(LIST_COLUMNS).split("[,:;]"));
         final List<XmlQuery> queries = new ArrayList<XmlQuery>();
         final Map<String, XmlMapEntry> mapSpecification = new HashMap<String, XmlMapEntry>();
+        final Map<String, String> structReplacementChars = new HashMap<String, String>();
+        
         for (String key : properties.stringPropertyNames()) {
             if (key.startsWith(COLUMN_XPATH_PREFIX)) {
                 // create column XPath query
@@ -127,6 +130,10 @@ public class XmlSerDe implements SerDe {
                 XmlMapEntry mapEntry = new XmlMapEntry(keyFacet, valueFacet);
                 mapSpecification.put(element, mapEntry);
             }
+            else if (key.startsWith(STRUCT_REPLACEMENT_CHARS_PREFIX))
+            {
+            	structReplacementChars.put(key.substring(STRUCT_REPLACEMENT_CHARS_PREFIX.length()),properties.getProperty(key));
+            }
         }
         if (queries.size() < columnNames.size()) {
             throw new RuntimeException("The number of XPath expressions does not much the number of columns");
@@ -148,14 +155,15 @@ public class XmlSerDe implements SerDe {
             public Properties getProperties() {
                 return properties;
             }
+             
         });
         // (5) create the object inspector and associate it with the XML processor
         List<TypeInfo> typeInfos = TypeInfoUtils.getTypeInfosFromTypeString(properties.getProperty(LIST_COLUMN_TYPES));
         List<ObjectInspector> inspectors = new ArrayList<ObjectInspector>(columnNames.size());
         for (TypeInfo typeInfo : typeInfos) {
-            inspectors.add(getStandardJavaObjectInspectorFromTypeInfo(typeInfo, this.xmlProcessor));
+            inspectors.add(getStandardJavaObjectInspectorFromTypeInfo(typeInfo, this.xmlProcessor, structReplacementChars));
         }
-        this.objectInspector = getStandardStructObjectInspector(columnNames, inspectors, this.xmlProcessor);
+        this.objectInspector = getStandardStructObjectInspector(columnNames, inspectors, this.xmlProcessor, structReplacementChars);
     }
 
     private static void initialize(Configuration configuration, final Properties properties, String... keys) {

@@ -18,6 +18,7 @@ package com.ibm.spss.hive.serde2.xml.objectinspector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
@@ -50,22 +51,22 @@ public class XmlObjectInspectorFactory {
      *            the XML processor
      * @return the standard java object inspector
      */
-    public static ObjectInspector getStandardJavaObjectInspectorFromTypeInfo(TypeInfo typeInfo, XmlProcessor xmlProcessor) {
+    public static ObjectInspector getStandardJavaObjectInspectorFromTypeInfo(TypeInfo typeInfo, XmlProcessor xmlProcessor, Map<String, String> structReplacementChars) {
         switch (typeInfo.getCategory()) {
             case PRIMITIVE: {
                 return PrimitiveObjectInspectorFactory.getPrimitiveJavaObjectInspector(((PrimitiveTypeInfo) typeInfo).getPrimitiveCategory());
             }
             case LIST: {
                 ObjectInspector listElementObjectInspector = getStandardJavaObjectInspectorFromTypeInfo(((ListTypeInfo) typeInfo).getListElementTypeInfo(),
-                    xmlProcessor);
+                    xmlProcessor, structReplacementChars);
                 return new XmlListObjectInspector(listElementObjectInspector, xmlProcessor);
             }
             case MAP: {
                 MapTypeInfo mapTypeInfo = (MapTypeInfo) typeInfo;
                 ObjectInspector mapKeyObjectInspector = getStandardJavaObjectInspectorFromTypeInfo(mapTypeInfo.getMapKeyTypeInfo(),
-                    xmlProcessor);
+                    xmlProcessor, structReplacementChars);
                 ObjectInspector mapValueObjectInspector = getStandardJavaObjectInspectorFromTypeInfo(mapTypeInfo.getMapValueTypeInfo(),
-                    xmlProcessor);
+                    xmlProcessor, structReplacementChars);
                 return new XmlMapObjectInspector(mapKeyObjectInspector, mapValueObjectInspector, xmlProcessor);
             }
             case STRUCT: {
@@ -74,9 +75,9 @@ public class XmlObjectInspectorFactory {
                 List<TypeInfo> fieldTypeInfos = structTypeInfo.getAllStructFieldTypeInfos();
                 List<ObjectInspector> structFieldObjectInspectors = new ArrayList<ObjectInspector>(fieldTypeInfos.size());
                 for (int fieldIndex = 0; fieldIndex < fieldTypeInfos.size(); ++fieldIndex) {
-                    structFieldObjectInspectors.add(getStandardJavaObjectInspectorFromTypeInfo(fieldTypeInfos.get(fieldIndex), xmlProcessor));
+                    structFieldObjectInspectors.add(getStandardJavaObjectInspectorFromTypeInfo(fieldTypeInfos.get(fieldIndex), xmlProcessor, structReplacementChars));
                 }
-                return getStandardStructObjectInspector(structFieldNames, structFieldObjectInspectors, xmlProcessor);
+                return getStandardStructObjectInspector(structFieldNames, structFieldObjectInspectors, xmlProcessor, structReplacementChars);
             }
             default: {
                 throw new IllegalStateException();
@@ -97,8 +98,8 @@ public class XmlObjectInspectorFactory {
      */
     public static StructObjectInspector getStandardStructObjectInspector(List<String> structFieldNames,
         List<ObjectInspector> structFieldObjectInspectors,
-        XmlProcessor xmlProcessor) {
-        return new XmlStructObjectInspector(structFieldNames, structFieldObjectInspectors, xmlProcessor);
+        XmlProcessor xmlProcessor,  Map<String, String> structReplacementChars) {
+        return new XmlStructObjectInspector(structFieldNames, structFieldObjectInspectors, xmlProcessor, structReplacementChars);
     }
 
 }

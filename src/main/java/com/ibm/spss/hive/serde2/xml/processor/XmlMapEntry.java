@@ -27,8 +27,6 @@ public class XmlMapEntry {
     /**
      * Creates an XML map entry specification for the custom XML to Map transformation
      * 
-     * @param fieldName
-     *            the field name
      * @param key
      *            the key specification
      * @param value

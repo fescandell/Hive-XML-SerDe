@@ -36,8 +36,9 @@ public interface XmlProcessor {
     /**
      * Returns the mapping of the column names to the parsed objects
      * 
-     * @param text
-     *            the text to parse
+     * @param value 
+     * 		the text to parse
+     * 
      * @return the mapping of the column names to the parsed objects
      */
     public Map<String, ?> parse(String value);
